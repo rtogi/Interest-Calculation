@@ -1,0 +1,757 @@
+Private Sub CommandButton1_Click()
+
+On Error Resume Next
+
+Dim fdate As String, ldate As String, _
+fy As String, fm As String, fd As String, _
+ly As String, lm As String, ld As String, _
+fy2 As Integer, fm2 As Integer, fd2 As Integer, _
+ly2 As Integer, lm2 As Integer, ld2 As Integer, _
+ptn As Integer, saiff As String, saill As String
+
+
+fdate = StrConv(TextBox1.Text, vbNarrow)
+ldate = StrConv(TextBox2.Text, vbNarrow)
+principal = StrConv(TextBox3.Text, vbNarrow)
+irate = StrConv(TextBox4.Text, vbNarrow)
+
+If Len(fdate) = 3 Then
+    If Mid(fdate, 2, 1) = "/" Then '1/1
+            fy = Format(Now, "yyyy")
+            fm = Left(fdate, 1)
+            fd = Right(fdate, 1)
+    Else
+        MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(fdate) = 4 Then
+    If Mid(fdate, 2, 1) = "/" Then '1/11
+            fy = Format(Now, "yyyy")
+            fm = Left(fdate, 1)
+            fd = Right(fdate, 2)
+    ElseIf Mid(fdate, 3, 1) = "/" Then '11/1
+            fy = Format(Now, "yyyy")
+            fm = Left(fdate, 2)
+            fd = Right(fdate, 1)
+    Else
+        MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(fdate) = 5 And Mid(fdate, 3, 1) = "/" Then '11/11
+            fy = Format(Now, "yyyy")
+            fm = Left(fdate, 2)
+            fd = Right(fdate, 2)
+ElseIf Len(fdate) = 6 And Mid(fdate, 3, 1) = "/" And Mid(fdate, 5, 1) = "/" Then 'm1/1/1
+            fy = Left(fdate, 2)
+            fm = Mid(fdate, 4, 1)
+            fd = Right(fdate, 1)
+ElseIf Len(fdate) = 7 Then
+    If Mid(fdate, 3, 1) = "/" Then
+        If Mid(fdate, 5, 1) = "/" Then 'm1/1/11
+            fy = Left(fdate, 2)
+            fm = Mid(fdate, 4, 1)
+            fd = Right(fdate, 2)
+        ElseIf Mid(fdate, 6, 1) = "/" Then 'm1/11/1
+            fy = Left(fdate, 2)
+            fm = Mid(fdate, 4, 2)
+            fd = Right(fdate, 1)
+        Else
+            MsgBox "日付の形式が正しくありません。"
+            Exit Sub
+        End If
+    ElseIf Mid(fdate, 4, 1) = "/" And Mid(fdate, 6, 1) = "/" Then 'm11/1/1
+            fy = Left(fdate, 3)
+            fm = Mid(fdate, 5, 1)
+            fd = Right(fdate, 1)
+    Else
+        MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(fdate) = 8 Then
+    If Mid(fdate, 3, 1) = "/" And Mid(fdate, 6, 1) = "/" Then 'm1/11/11
+            fy = Left(fdate, 2)
+            fm = Mid(fdate, 4, 2)
+            fd = Right(fdate, 2)
+    ElseIf Mid(fdate, 4, 1) = "/" Then
+        If Mid(fdate, 6, 1) = "/" Then 'm11/1/11
+            fy = Left(fdate, 3)
+            fm = Mid(fdate, 5, 1)
+            fd = Right(fdate, 2)
+        ElseIf Mid(fdate, 7, 1) = "/" Then 'm11/11/1
+            fy = Left(fdate, 3)
+            fm = Mid(fdate, 5, 2)
+            fd = Right(fdate, 1)
+        Else
+            MsgBox "日付の形式が正しくありません。"
+            Exit Sub
+        End If
+    ElseIf Mid(fdate, 5, 1) = "/" And Mid(fdate, 7, 1) = "/" Then '1111/1/1
+            fy = Left(fdate, 4)
+            fm = Mid(fdate, 6, 1)
+            fd = Right(fdate, 1)
+    Else
+        MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(fdate) = 9 Then
+    If Mid(fdate, 4, 1) = "/" And Mid(fdate, 7, 1) = "/" Then 'm11/11/11
+            fy = Left(fdate, 3)
+            fm = Mid(fdate, 5, 2)
+            fd = Right(fdate, 2)
+    ElseIf Mid(fdate, 5, 1) = "/" Then
+        If Mid(fdate, 7, 1) = "/" Then '1111/1/11
+            fy = Left(fdate, 4)
+            fm = Mid(fdate, 6, 1)
+            fd = Right(fdate, 2)
+        ElseIf Mid(fdate, 8, 1) = "/" Then '1111/11/1
+            fy = Left(fdate, 4)
+            fm = Mid(fdate, 6, 2)
+            fd = Right(fdate, 1)
+        Else
+            MsgBox "日付の形式が正しくありません。"
+            Exit Sub
+        End If
+    Else
+        MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(fdate) = 10 And Mid(fdate, 5, 1) = "/" And Mid(fdate, 8, 1) = "/" Then '1111/11/11
+            fy = Left(fdate, 4)
+            fm = Mid(fdate, 6, 2)
+            fd = Right(fdate, 2)
+ElseIf fdate = "" Then
+            fy = Year(Date)
+            fm = Month(Date)
+            fd = Day(Date)
+Else
+    MsgBox "日付の形式が正しくありません。"
+    Exit Sub
+End If
+
+If Left(UCase(fy), 1) = "M" Then
+    fy = Right(fy, Len(fy) - 1) + 1867
+ElseIf Left(UCase(fy), 1) = "T" Then
+    fy = Right(fy, Len(fy) - 1) + 1911
+ElseIf Left(UCase(fy), 1) = "S" Then
+    fy = Right(fy, Len(fy) - 1) + 1925
+ElseIf Left(UCase(fy), 1) = "H" Then
+    fy = Right(fy, Len(fy) - 1) + 1988
+ElseIf Left(UCase(fy), 1) = "R" Then
+    fy = Right(fy, Len(fy) - 1) + 2018
+End If
+
+
+If Len(ldate) = 3 Then
+    If Mid(ldate, 2, 1) = "/" Then '1/1
+            fy = Format(Now, "yyyy")
+            fm = Left(ldate, 1)
+            fd = Right(ldate, 1)
+    Else
+        MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(ldate) = 4 Then
+    If Mid(ldate, 2, 1) = "/" Then '1/11
+            ly = Format(Now, "yyyy")
+            lm = Left(ldate, 1)
+            ld = Right(ldate, 2)
+    ElseIf Mid(ldate, 3, 1) = "/" Then '11/1
+            ly = Format(Now, "yyyy")
+            lm = Left(ldate, 2)
+            ld = Right(ldate, 1)
+    Else
+        MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(ldate) = 5 And Mid(ldate, 3, 1) = "/" Then '11/11
+            ly = Format(Now, "yyyy")
+            lm = Left(ldate, 2)
+            ld = Right(ldate, 2)
+ElseIf Len(ldate) = 6 And Mid(ldate, 3, 1) = "/" And Mid(ldate, 5, 1) = "/" Then 'm1/1/1
+            ly = Left(ldate, 2)
+            lm = Mid(ldate, 4, 1)
+            ld = Right(ldate, 1)
+ElseIf Len(ldate) = 7 Then
+    If Mid(ldate, 3, 1) = "/" Then
+        If Mid(ldate, 5, 1) = "/" Then 'm1/1/11
+            ly = Left(ldate, 2)
+            lm = Mid(ldate, 4, 1)
+            ld = Right(ldate, 2)
+        ElseIf Mid(ldate, 6, 1) = "/" Then 'm1/11/1
+            ly = Left(ldate, 2)
+            lm = Mid(ldate, 4, 2)
+            ld = Right(ldate, 1)
+        Else
+            MsgBox "日付の形式が正しくありません。"
+            Exit Sub
+        End If
+    ElseIf Mid(ldate, 4, 1) = "/" And Mid(ldate, 6, 1) = "/" Then 'm11/1/1
+            ly = Left(ldate, 3)
+            lm = Mid(ldate, 5, 1)
+            ld = Right(ldate, 1)
+    Else
+            MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    Exit Sub
+    End If
+ElseIf Len(ldate) = 8 Then
+    If Mid(ldate, 3, 1) = "/" And Mid(ldate, 6, 1) = "/" Then 'm1/11/11
+            ly = Left(ldate, 2)
+            lm = Mid(ldate, 4, 2)
+            ld = Right(ldate, 2)
+    ElseIf Mid(ldate, 4, 1) = "/" Then
+        If Mid(ldate, 6, 1) = "/" Then 'm11/1/11
+            ly = Left(ldate, 3)
+            lm = Mid(ldate, 5, 1)
+            ld = Right(ldate, 2)
+        ElseIf Mid(ldate, 7, 1) = "/" Then 'm11/11/1
+            ly = Left(ldate, 3)
+            lm = Mid(ldate, 5, 2)
+            ld = Right(ldate, 1)
+        Else
+            MsgBox "日付の形式が正しくありません。"
+            Exit Sub
+        End If
+    ElseIf Mid(ldate, 5, 1) = "/" And Mid(ldate, 7, 1) = "/" Then '1111/1/1
+            ly = Left(ldate, 4)
+            lm = Mid(ldate, 6, 1)
+            ld = Right(ldate, 1)
+    Else
+            MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(ldate) = 9 Then
+    If Mid(ldate, 4, 1) = "/" And Mid(ldate, 7, 1) = "/" Then 'm11/11/11
+            ly = Left(ldate, 3)
+            lm = Mid(ldate, 5, 2)
+            ld = Right(ldate, 2)
+    ElseIf Mid(ldate, 5, 1) = "/" Then
+        If Mid(ldate, 7, 1) = "/" Then '1111/1/11
+            ly = Left(ldate, 4)
+            lm = Mid(ldate, 6, 1)
+            ld = Right(ldate, 2)
+        ElseIf Mid(ldate, 8, 1) = "/" Then '1111/11/1
+            ly = Left(ldate, 4)
+            lm = Mid(ldate, 6, 2)
+            ld = Right(ldate, 1)
+        Else
+            MsgBox "日付の形式が正しくありません。"
+            Exit Sub
+        End If
+    Else
+            MsgBox "日付の形式が正しくありません。"
+        Exit Sub
+    End If
+ElseIf Len(ldate) = 10 And Mid(ldate, 5, 1) = "/" And Mid(ldate, 8, 1) = "/" Then '1111/11/11
+            ly = Left(ldate, 4)
+            lm = Mid(ldate, 6, 2)
+            ld = Right(ldate, 2)
+ElseIf ldate = "" Then
+            ly = Year(Date)
+            lm = Month(Date)
+            ld = Day(Date)
+Else
+    MsgBox "日付の形式が正しくありません。"
+    Exit Sub
+End If
+
+If Left(UCase(ly), 1) = "M" Then
+    ly = Right(ly, Len(ly) - 1) + 1867
+ElseIf Left(UCase(ly), 1) = "T" Then
+    ly = Right(ly, Len(ly) - 1) + 1911
+ElseIf Left(UCase(ly), 1) = "S" Then
+    ly = Right(ly, Len(ly) - 1) + 1925
+ElseIf Left(UCase(ly), 1) = "H" Then
+    ly = Right(ly, Len(ly) - 1) + 1988
+ElseIf Left(UCase(ly), 1) = "R" Then
+    ly = Right(ly, Len(ly) - 1) + 2018
+End If
+
+
+ff = fy & "/" & fm & "/" & fd '当初日付
+ll = ly & "/" & lm & "/" & ld '最終日付
+
+If IsDate(ff) = False Then
+    MsgBox "日付の形式が正しくありません。"
+    Exit Sub
+End If
+
+If IsDate(ll) = False Then
+    MsgBox "日付の形式が正しくありません。"
+    Exit Sub
+End If
+
+
+'休日判定
+If DatePart("yyyy", ff) = 2020 And DatePart("m", ff) = 7 And DatePart("d", ff) = 23 Then
+    saiff = "休日(海の日)"
+ElseIf DatePart("yyyy", ff) = 2020 And DatePart("m", ff) = 7 And DatePart("d", ff) = 24 Then
+    saiff = "休日(スポーツの日)"
+ElseIf DatePart("yyyy", ff) = 2020 And DatePart("m", ff) = 8 And DatePart("d", ff) = 10 Then
+    saiff = "休日(山の日)"
+ElseIf DatePart("yyyy", ff) = 2019 And DatePart("m", ff) = 5 And DatePart("d", ff) = 1 Then
+    saiff = "休日(天皇の即位の日)"
+ElseIf DatePart("yyyy", ff) = 2019 And DatePart("m", ff) = 5 And DatePart("d", ff) = 2 Then
+    saiff = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ff) = 2019 And DatePart("m", ff) = 4 And DatePart("d", ff) = 30 Then
+    saiff = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ff) = 2019 And DatePart("m", ff) = 10 And DatePart("d", ff) = 22 Then
+    saiff = "休日(即位礼正殿の儀が行われる日)"
+ElseIf DatePart("yyyy", ff) = 1993 And DatePart("m", ff) = 6 And DatePart("d", ff) = 9 Then
+    saiff = "休日(皇太子徳仁親王の結婚の儀の行われる日)"
+ElseIf DatePart("yyyy", ff) = 1990 And DatePart("m", ff) = 11 And DatePart("d", ff) = 12 Then
+    saiff = "休日(即位礼正殿の儀が行われる日)"
+ElseIf DatePart("yyyy", ff) = 1989 And DatePart("m", ff) = 2 And DatePart("d", ff) = 24 Then
+    saiff = "休日(昭和天皇の大喪の礼の行われる日)"
+ElseIf DatePart("yyyy", ff) = 1959 And DatePart("m", ff) = 4 And DatePart("d", ff) = 10 Then
+    saiff = "休日(皇太子明仁親王の結婚の儀の行われる日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 1 And DatePart("d", ff) = 1 Then
+    saiff = "休日(元日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 1 And DatePart("d", ff) = 2 And Weekday(ff) = 2 Then
+    saiff = "休日(元日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("yyyy", ff) <= 1999 And DatePart("m", ff) = 1 And DatePart("d", ff) = 15 Then
+    saiff = "休日(成人の日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("yyyy", ff) <= 1999 And DatePart("m", ff) = 1 And DatePart("d", ff) = 16 And Weekday(ff) = 2 Then
+    saiff = "休日(成人の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2000 And DatePart("m", ff) = 1 And DatePart("d", ff) > 7 And DatePart("d", ff) < 15 And Weekday(ff) = 2 Then
+    saiff = "休日(成人の日)"
+ElseIf DatePart("yyyy", ff) >= 1967 And DatePart("m", ff) = 2 And DatePart("d", ff) = 11 Then
+    saiff = "休日(建国記念の日)"
+ElseIf DatePart("yyyy", ff) >= 1967 And DatePart("m", ff) = 2 And DatePart("d", ff) = 12 And Weekday(ff) = 2 Then
+    saiff = "休日(建国記念の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2020 And DatePart("m", ff) = 2 And DatePart("d", ff) = 23 Then
+    saiff = "休日(天皇誕生日)"
+ElseIf DatePart("yyyy", ff) >= 2020 And DatePart("m", ff) = 2 And DatePart("d", ff) = 24 And Weekday(ff) = 2 Then
+    saiff = "休日(天皇誕生日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 3 And DatePart("d", ff) = Int(20.8431 + 0.242194 * (DatePart("yyyy", ff) - 1980) - Int((DatePart("yyyy", ff) - 1980) / 4)) Then
+    saiff = "休日(春分の日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 3 And DatePart("d", ff) = Int(20.8431 + 0.242194 * (DatePart("yyyy", ff) - 1980) - Int((DatePart("yyyy", ff) - 1980) / 4)) + 1 And Weekday(ff) = 2 Then
+    saiff = "休日(春分の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("yyyy", ff) <= 1988 And DatePart("m", ff) = 4 And DatePart("d", ff) = 29 Then
+    saiff = "休日(天皇誕生日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("yyyy", ff) <= 1988 And DatePart("m", ff) = 4 And DatePart("d", ff) = 30 And Weekday(ff) = 2 Then
+    saiff = "休日(天皇誕生日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1989 And DatePart("yyyy", ff) <= 2006 And DatePart("m", ff) = 4 And DatePart("d", ff) = 29 Then
+    saiff = "休日(みどりの日)"
+ElseIf DatePart("yyyy", ff) >= 1989 And DatePart("yyyy", ff) <= 2006 And DatePart("m", ff) = 4 And DatePart("d", ff) = 30 And Weekday(ff) = 2 Then
+    saiff = "休日(みどりの日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2007 And DatePart("m", ff) = 4 And DatePart("d", ff) = 29 Then
+    saiff = "休日(昭和の日)"
+ElseIf DatePart("yyyy", ff) >= 2007 And DatePart("m", ff) = 4 And DatePart("d", ff) = 30 And Weekday(ff) = 2 Then
+    saiff = "休日(昭和の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 5 And DatePart("d", ff) = 3 Then
+    saiff = "休日(憲法記念日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("yyyy", ff) <= 1987 And DatePart("m", ff) = 5 And DatePart("d", ff) = 4 And Weekday(ff) = 2 Then
+    saiff = "休日(憲法記念日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1988 And DatePart("yyyy", ff) <= 2006 And DatePart("m", ff) = 5 And DatePart("d", ff) = 4 Then
+    saiff = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ff) >= 2007 And DatePart("m", ff) = 5 And DatePart("d", ff) = 4 Then
+    saiff = "休日(みどりの日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 5 And DatePart("d", ff) = 5 Then
+    saiff = "休日(こどもの日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 5 And DatePart("d", ff) = 6 And Weekday(ff) = 2 Then
+    saiff = "休日(こどもの日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2007 And DatePart("m", ff) = 5 And DatePart("d", ff) = 6 And Weekday(ff) = 3 Then
+    saiff = "休日(みどりの日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2007 And DatePart("m", ff) = 5 And DatePart("d", ff) = 6 And Weekday(ff) = 4 Then
+    saiff = "休日(憲法記念日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1996 And DatePart("yyyy", ff) <= 2002 And DatePart("m", ff) = 7 And DatePart("d", ff) = 20 Then
+    saiff = "休日(海の日)"
+ElseIf DatePart("yyyy", ff) >= 1996 And DatePart("yyyy", ff) <= 2002 And DatePart("m", ff) = 7 And DatePart("d", ff) = 21 And Weekday(ff) = 2 Then
+    saiff = "休日(海の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2003 And DatePart("m", ff) = 7 And DatePart("d", ff) > 14 And DatePart("d", ff) < 22 And Weekday(ff) = 2 Then
+    saiff = "休日(海の日)"
+ElseIf DatePart("yyyy", ff) >= 2016 And DatePart("m", ff) = 8 And DatePart("d", ff) = 11 Then
+    saiff = "休日(山の日)"
+ElseIf DatePart("yyyy", ff) >= 2016 And DatePart("m", ff) = 8 And DatePart("d", ff) = 12 And Weekday(ff) = 2 Then
+    saiff = "休日(山の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1966 And DatePart("yyyy", ff) <= 2002 And DatePart("m", ff) = 9 And DatePart("d", ff) = 15 Then
+    saiff = "休日(敬老の日)"
+ElseIf DatePart("yyyy", ff) >= 1966 And DatePart("yyyy", ff) <= 2002 And DatePart("m", ff) = 9 And DatePart("d", ff) = 16 And Weekday(ff) = 2 Then
+    saiff = "休日(敬老の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2003 And DatePart("m", ff) = 9 And DatePart("d", ff) > 14 And DatePart("d", ff) < 22 And Weekday(ff) = 2 Then
+    saiff = "休日(敬老の日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 9 And DatePart("d", ff) = Int(23.2488 + 0.242194 * (DatePart("yyyy", ff) - 1980) - Int((DatePart("yyyy", ff) - 1980) / 4)) Then
+    saiff = "休日(秋分の日)"
+ElseIf DatePart("yyyy", ff) >= 2003 And DatePart("m", ff) = 9 And DatePart("d", ff) > 15 And DatePart("d", ff) < 23 And Weekday(ff) = 3 And _
+       DatePart("d", ff) = Int(23.2488 + 0.242194 * (DatePart("yyyy", ff) - 1980) - Int((DatePart("yyyy", ff) - 1980) / 4)) - 1 Then
+    saiff = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 9 And DatePart("d", ff) = Int(23.2488 + 0.242194 * (DatePart("yyyy", ff) - 1980) - Int((DatePart("yyyy", ff) - 1980) / 4)) + 1 And Weekday(ff) = 2 Then
+    saiff = "休日(秋分の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1996 And DatePart("yyyy", ff) <= 2002 And DatePart("m", ff) = 10 And DatePart("d", ff) = 10 Then
+    saiff = "休日(体育の日)"
+ElseIf DatePart("yyyy", ff) >= 1996 And DatePart("yyyy", ff) <= 2002 And DatePart("m", ff) = 10 And DatePart("d", ff) = 11 And Weekday(ff) = 2 Then
+    saiff = "休日(体育の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 2003 And DatePart("yyyy", ff) <= 2019 And DatePart("m", ff) = 10 And DatePart("d", ff) > 7 And DatePart("d", ff) < 15 And Weekday(ff) = 2 Then
+    saiff = "休日(体育の日)"
+ElseIf DatePart("yyyy", ff) >= 2021 And DatePart("m", ff) = 10 And DatePart("d", ff) > 7 And DatePart("d", ff) < 15 And Weekday(ff) = 2 Then
+    saiff = "休日(スポーツの日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 11 And DatePart("d", ff) = 3 Then
+    saiff = "休日(文化の日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 11 And DatePart("d", ff) = 4 And Weekday(ff) = 2 Then
+    saiff = "休日(文化の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 11 And DatePart("d", ff) = 23 Then
+    saiff = "休日(勤労感謝の日)"
+ElseIf DatePart("yyyy", ff) >= 1948 And DatePart("m", ff) = 11 And DatePart("d", ff) = 24 And Weekday(ff) = 2 Then
+    saiff = "休日(勤労感謝の日の振替)"
+ElseIf DatePart("yyyy", ff) >= 1989 And DatePart("yyyy", ff) <= 2018 And DatePart("m", ff) = 12 And DatePart("d", ff) = 23 Then
+    saiff = "休日(天皇誕生日)"
+ElseIf DatePart("yyyy", ff) >= 1989 And DatePart("yyyy", ff) <= 2018 And DatePart("m", ff) = 12 And DatePart("d", ff) = 24 And Weekday(ff) = 2 Then
+    saiff = "休日(天皇誕生日の振替)"
+ElseIf Weekday(ff) = 1 Then
+    saiff = "日曜日"
+ElseIf Weekday(ff) = 7 Then
+    saiff = "土曜日"
+End If
+
+If DatePart("yyyy", ll) = 2020 And DatePart("m", ll) = 7 And DatePart("d", ll) = 23 Then
+    saill = "休日(海の日)"
+ElseIf DatePart("yyyy", ll) = 2020 And DatePart("m", ll) = 7 And DatePart("d", ll) = 24 Then
+    saill = "休日(スポーツの日)"
+ElseIf DatePart("yyyy", ll) = 2020 And DatePart("m", ll) = 8 And DatePart("d", ll) = 10 Then
+    saill = "休日(山の日)"
+ElseIf DatePart("yyyy", ll) = 2019 And DatePart("m", ll) = 5 And DatePart("d", ll) = 1 Then
+    saill = "休日(天皇の即位の日)"
+ElseIf DatePart("yyyy", ll) = 2019 And DatePart("m", ll) = 5 And DatePart("d", ll) = 2 Then
+    saill = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ll) = 2019 And DatePart("m", ll) = 4 And DatePart("d", ll) = 30 Then
+    saill = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ll) = 2019 And DatePart("m", ll) = 10 And DatePart("d", ll) = 22 Then
+    saill = "休日(即位礼正殿の儀が行われる日)"
+ElseIf DatePart("yyyy", ll) = 1993 And DatePart("m", ll) = 6 And DatePart("d", ll) = 9 Then
+    saill = "休日(皇太子徳仁親王の結婚の儀の行われる日)"
+ElseIf DatePart("yyyy", ll) = 1990 And DatePart("m", ll) = 11 And DatePart("d", ll) = 12 Then
+    saill = "休日(即位礼正殿の儀が行われる日)"
+ElseIf DatePart("yyyy", ll) = 1989 And DatePart("m", ll) = 2 And DatePart("d", ll) = 24 Then
+    saill = "休日(昭和天皇の大喪の礼の行われる日)"
+ElseIf DatePart("yyyy", ll) = 1959 And DatePart("m", ll) = 4 And DatePart("d", ll) = 10 Then
+    saill = "休日(皇太子明仁親王の結婚の儀の行われる日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 1 And DatePart("d", ll) = 1 Then
+    saill = "休日(元日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 1 And DatePart("d", ll) = 2 And Weekday(ll) = 2 Then
+    saill = "休日(元日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("yyyy", ll) <= 1999 And DatePart("m", ll) = 1 And DatePart("d", ll) = 15 Then
+    saill = "休日(成人の日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("yyyy", ll) <= 1999 And DatePart("m", ll) = 1 And DatePart("d", ll) = 16 And Weekday(ll) = 2 Then
+    saill = "休日(成人の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2000 And DatePart("m", ll) = 1 And DatePart("d", ll) > 7 And DatePart("d", ll) < 15 And Weekday(ll) = 2 Then
+    saill = "休日(成人の日)"
+ElseIf DatePart("yyyy", ll) >= 1967 And DatePart("m", ll) = 2 And DatePart("d", ll) = 11 Then
+    saill = "休日(建国記念の日)"
+ElseIf DatePart("yyyy", ll) >= 1967 And DatePart("m", ll) = 2 And DatePart("d", ll) = 12 And Weekday(ll) = 2 Then
+    saill = "休日(建国記念の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2020 And DatePart("m", ll) = 2 And DatePart("d", ll) = 23 Then
+    saill = "休日(天皇誕生日)"
+ElseIf DatePart("yyyy", ll) >= 2020 And DatePart("m", ll) = 2 And DatePart("d", ll) = 24 And Weekday(ll) = 2 Then
+    saill = "休日(天皇誕生日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 3 And DatePart("d", ll) = Int(20.8431 + 0.242194 * (DatePart("yyyy", ll) - 1980) - Int((DatePart("yyyy", ll) - 1980) / 4)) Then
+    saill = "休日(春分の日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 3 And DatePart("d", ll) = Int(20.8431 + 0.242194 * (DatePart("yyyy", ll) - 1980) - Int((DatePart("yyyy", ll) - 1980) / 4)) + 1 And Weekday(ll) = 2 Then
+    saill = "休日(春分の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("yyyy", ll) <= 1988 And DatePart("m", ll) = 4 And DatePart("d", ll) = 29 Then
+    saill = "休日(天皇誕生日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("yyyy", ll) <= 1988 And DatePart("m", ll) = 4 And DatePart("d", ll) = 30 And Weekday(ll) = 2 Then
+    saill = "休日(天皇誕生日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1989 And DatePart("yyyy", ll) <= 2006 And DatePart("m", ll) = 4 And DatePart("d", ll) = 29 Then
+    saill = "休日(みどりの日)"
+ElseIf DatePart("yyyy", ll) >= 1989 And DatePart("yyyy", ll) <= 2006 And DatePart("m", ll) = 4 And DatePart("d", ll) = 30 And Weekday(ll) = 2 Then
+    saill = "休日(みどりの日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2007 And DatePart("m", ll) = 4 And DatePart("d", ll) = 29 Then
+    saill = "休日(昭和の日)"
+ElseIf DatePart("yyyy", ll) >= 2007 And DatePart("m", ll) = 4 And DatePart("d", ll) = 30 And Weekday(ll) = 2 Then
+    saill = "休日(昭和の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 5 And DatePart("d", ll) = 3 Then
+    saill = "休日(憲法記念日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("yyyy", ll) <= 1987 And DatePart("m", ll) = 5 And DatePart("d", ll) = 4 And Weekday(ll) = 2 Then
+    saill = "休日(憲法記念日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1988 And DatePart("yyyy", ll) <= 2006 And DatePart("m", ll) = 5 And DatePart("d", ll) = 4 Then
+    saill = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ll) >= 2007 And DatePart("m", ll) = 5 And DatePart("d", ll) = 4 Then
+    saill = "休日(みどりの日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 5 And DatePart("d", ll) = 5 Then
+    saill = "休日(こどもの日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 5 And DatePart("d", ll) = 6 And Weekday(ll) = 2 Then
+    saill = "休日(こどもの日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2007 And DatePart("m", ll) = 5 And DatePart("d", ll) = 6 And Weekday(ll) = 3 Then
+    saill = "休日(みどりの日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2007 And DatePart("m", ll) = 5 And DatePart("d", ll) = 6 And Weekday(ll) = 4 Then
+    saill = "休日(憲法記念日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1996 And DatePart("yyyy", ll) <= 2002 And DatePart("m", ll) = 7 And DatePart("d", ll) = 20 Then
+    saill = "休日(海の日)"
+ElseIf DatePart("yyyy", ll) >= 1996 And DatePart("yyyy", ll) <= 2002 And DatePart("m", ll) = 7 And DatePart("d", ll) = 21 And Weekday(ll) = 2 Then
+    saill = "休日(海の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2003 And DatePart("m", ll) = 7 And DatePart("d", ll) > 14 And DatePart("d", ll) < 22 And Weekday(ll) = 2 Then
+    saill = "休日(海の日)"
+ElseIf DatePart("yyyy", ll) >= 2016 And DatePart("m", ll) = 8 And DatePart("d", ll) = 11 Then
+    saill = "休日(山の日)"
+ElseIf DatePart("yyyy", ll) >= 2016 And DatePart("m", ll) = 8 And DatePart("d", ll) = 12 And Weekday(ll) = 2 Then
+    saill = "休日(山の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1966 And DatePart("yyyy", ll) <= 2002 And DatePart("m", ll) = 9 And DatePart("d", ll) = 15 Then
+    saill = "休日(敬老の日)"
+ElseIf DatePart("yyyy", ll) >= 1966 And DatePart("yyyy", ll) <= 2002 And DatePart("m", ll) = 9 And DatePart("d", ll) = 16 And Weekday(ll) = 2 Then
+    saill = "休日(敬老の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2003 And DatePart("m", ll) = 9 And DatePart("d", ll) > 14 And DatePart("d", ll) < 22 And Weekday(ll) = 2 Then
+    saill = "休日(敬老の日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 9 And DatePart("d", ll) = Int(23.2488 + 0.242194 * (DatePart("yyyy", ll) - 1980) - Int((DatePart("yyyy", ll) - 1980) / 4)) Then
+    saill = "休日(秋分の日)"
+ElseIf DatePart("yyyy", ll) >= 2003 And DatePart("m", ll) = 9 And DatePart("d", ll) > 15 And DatePart("d", ll) < 23 And Weekday(ll) = 3 And _
+       DatePart("d", ll) = Int(23.2488 + 0.242194 * (DatePart("yyyy", ll) - 1980) - Int((DatePart("yyyy", ll) - 1980) / 4)) - 1 Then
+    saill = "休日(国民の休日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 9 And DatePart("d", ll) = Int(23.2488 + 0.242194 * (DatePart("yyyy", ll) - 1980) - Int((DatePart("yyyy", ll) - 1980) / 4)) + 1 And Weekday(ll) = 2 Then
+    saill = "休日(秋分の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1996 And DatePart("yyyy", ll) <= 2002 And DatePart("m", ll) = 10 And DatePart("d", ll) = 10 Then
+    saill = "休日(体育の日)"
+ElseIf DatePart("yyyy", ll) >= 1996 And DatePart("yyyy", ll) <= 2002 And DatePart("m", ll) = 10 And DatePart("d", ll) = 11 And Weekday(ll) = 2 Then
+    saill = "休日(体育の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 2003 And DatePart("yyyy", ll) <= 2019 And DatePart("m", ll) = 10 And DatePart("d", ll) > 7 And DatePart("d", ll) < 15 And Weekday(ll) = 2 Then
+    saill = "休日(体育の日)"
+ElseIf DatePart("yyyy", ll) >= 2021 And DatePart("m", ll) = 10 And DatePart("d", ll) > 7 And DatePart("d", ll) < 15 And Weekday(ll) = 2 Then
+    saill = "休日(スポーツの日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 11 And DatePart("d", ll) = 3 Then
+    saill = "休日(文化の日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 11 And DatePart("d", ll) = 4 And Weekday(ll) = 2 Then
+    saill = "休日(文化の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 11 And DatePart("d", ll) = 23 Then
+    saill = "休日(勤労感謝の日)"
+ElseIf DatePart("yyyy", ll) >= 1948 And DatePart("m", ll) = 11 And DatePart("d", ll) = 24 And Weekday(ll) = 2 Then
+    saill = "休日(勤労感謝の日の振替)"
+ElseIf DatePart("yyyy", ll) >= 1989 And DatePart("yyyy", ll) <= 2018 And DatePart("m", ll) = 12 And DatePart("d", ll) = 23 Then
+    saill = "休日(天皇誕生日)"
+ElseIf DatePart("yyyy", ll) >= 1989 And DatePart("yyyy", ll) <= 2018 And DatePart("m", ll) = 12 And DatePart("d", ll) = 24 And Weekday(ll) = 2 Then
+    saill = "休日(天皇誕生日の振替)"
+ElseIf Weekday(ll) = 1 Then
+    saill = "日曜日"
+ElseIf Weekday(ll) = 7 Then
+    saill = "土曜日"
+End If
+
+
+
+'最終年前年の当初月日
+If fm = 2 And fd = 29 Then
+    ff2 = ly - 1 & "/2/28"
+Else
+    ff2 = ly - 1 & "/" & fm & "/" & fd
+End If
+
+'最終年の当初月日
+If IsDate(ll) = False And fm = 2 And fd = 29 Then
+    ff3 = ly & "/2/28"
+Else
+    ff3 = ly & "/" & fm & "/" & fd
+End If
+
+
+'初日算入
+If CheckBox4.Value = False Then
+    ff = DateAdd("d", -1, ff)
+    ff2 = DateAdd("d", -1, ff2)
+    ff3 = DateAdd("d", -1, ff3)
+    ddif3 = ddif3 + 1
+End If
+
+
+'ff2～年末
+ddif1 = DateDiff("d", ff2, ly - 1 & "/12/31")
+
+'最終年の年初～ll
+ddif2 = DateDiff("d", ly & "/1/1", ll) + 1
+
+'最終年の1年前が属する年の日数(365or366)
+ddif3 = DateDiff("d", ly - 1 & "/1/1", ly - 1 & "/12/31") + 1
+
+'最終年が属する年の日数(365or366)
+ddif4 = DateDiff("d", ly & "/1/1", ly & "/12/31") + 1
+
+
+'stringで型定義していたものをintegerに変更
+fy2 = fy
+fm2 = fm
+fd2 = fd
+ly2 = ly
+lm2 = lm
+ld2 = ld
+
+If fy2 <= ly2 And DatePart("m", ff) = DatePart("m", ll) _
+    And DatePart("d", ff) = DatePart("d", ll) Then '1/1～12/31を計算する場合
+    If fm2 = 1 And fd2 = 1 And lm2 = 12 And ld2 = 31 Then
+                ydif = ly - fy + 1
+    Else
+                ydif = ly - fy
+    End If
+                ddif = 0
+                ptn = 1
+ElseIf fy2 < ly2 And DateDiff("d", fy & "/1/1", fy & "/12/31") = 365 And ddif4 = 365 And _
+    DatePart("m", ff) = 2 And DatePart("d", ff) = 29 And _
+    DatePart("m", ll) = 2 And DatePart("d", ll) = 28 Then '当初年が閏年かつ最終年が非閏年で、2/29～2/28を計算する場合
+                ydif = ly - fy
+                ddif = 0
+                ptn = 1
+ElseIf fy2 < ly2 Then '順年
+    If fm2 < lm2 Then '順月
+                ydif = ly2 - fy2
+                ddif = DateDiff("d", ff3, ll)
+                ptn = 1
+    ElseIf fm2 > lm2 Then '逆月
+                ydif = ly2 - fy2 - 1
+                ddif = DateDiff("d", ff2, ll) 'ddif1+ddif2と同じのはず
+                ptn = 2
+    ElseIf fm2 = lm2 Then '同月
+        If fd2 < ld2 Then '順日
+                ydif = ly - fy
+                ddif = DateDiff("d", ff3, ll)
+                ptn = 1
+        ElseIf fd2 > ld2 Then '逆日
+                ydif = ly - fy - 1
+                ddif = DateDiff("d", ff2, ll) 'ddif1+ddif2と同じのはず
+                ptn = 2
+        Else '同日
+                ydif = ly - fy
+                ddif = 1
+                ptn = 1
+        End If
+    End If
+ElseIf fy2 = ly2 Then '同年
+                ptn = 1
+    If fm2 < lm2 Then '順月
+                ydif = 0
+                ddif = DateDiff("d", ff, ll)
+    ElseIf fm2 = lm2 Then '同月
+        If fd2 <= ld2 Then '順日・同日
+                ydif = 0
+                ddif = DateDiff("d", ff, ll)
+        Else
+            MsgBox "日付１を日付２以前の日に設定してください"
+            Exit Sub
+        End If
+    Else
+        MsgBox "日付１を日付２以前の日に設定してください"
+        Exit Sub
+    End If
+Else
+    MsgBox "日付１を日付２以前の日に設定してください"
+    Exit Sub
+End If
+
+
+'[元号]1年を元年に
+fdates = fy & "年" & fm & "月" & fd & "日"
+fdatew = Format(fdates, "ggge年")
+
+If Len(fdatew) = 4 And Mid(fdatew, 3, 1) = "1" Then
+    Mid(fdatew, 3, 1) = "元"
+End If
+
+ldates = ly & "年" & lm & "月" & ld & "日"
+ldatew = Format(ldates, "ggge年")
+
+If Len(ldatew) = 4 And Mid(ldatew, 3, 1) = "1" Then
+    Mid(ldatew, 3, 1) = "元"
+End If
+
+'「令和」設定
+If fdatew = "平成31年" And DatePart("m", fdates) >= 5 Then
+    fdatew = "令和元年"
+End If
+
+If DatePart("yyyy", fdates) >= 2020 Then
+    fdatew = "令和" & DatePart("yyyy", fdates) - 2018 & "年"
+End If
+
+If ldatew = "平成31年" And DatePart("m", ldates) >= 5 Then
+    ldatew = "令和元年"
+End If
+
+If DatePart("yyyy", ldates) >= 2020 Then
+    ldatew = "令和" & DatePart("yyyy", ldates) - 2018 & "年"
+End If
+
+
+'法定利息
+If irate = "" Then
+    irate = 5
+End If
+
+'利率計算
+If CheckBox2.Value = True Then
+        interest = principal * irate * DateDiff("d", ff, ll) / 36500
+        culcform = principal & "円×" & irate & "%×" & DateDiff("d", ff, ll) & "日/365日"
+ElseIf ptn = 1 Then
+    If CheckBox3.Value = False Then
+        interest = principal * irate * ydif / 100 + _
+                   principal * irate * ddif / ddif4 / 100
+        culcform = principal & "円×" & irate & "%×" & ydif & "年＋" & _
+                   principal & "円×" & irate & "%×" & ddif & "日/" & ddif4 & "日"
+    Else
+        interest = principal * irate * ydif / 100 + _
+                   principal * irate * ddif / 36500
+        culcform = principal & "円×" & irate & "%×" & ydif & "年＋" & _
+                   principal & "円×" & irate & "%×" & ddif & "日/365日"
+    End If
+ElseIf ptn = 2 Then
+    If CheckBox3.Value = False Then
+        interest = principal * irate * ydif / 100 + _
+                   principal * irate * ddif1 / ddif3 / 100 + _
+                   principal * irate * ddif2 / ddif4 / 100
+        If ddif3 = 365 And ddif4 = 365 Then
+            culcform = principal & "円×" & irate & "%×" & ydif & "年＋" & _
+                       principal & "円×" & irate & "%×" & (ddif1 + ddif2) & "日/" & "365日"
+        Else
+            culcform = principal & "円×" & irate & "%×" & ydif & "年＋" & _
+                       principal & "円×" & irate & "%×" & ddif1 & "日/" & ddif3 & "日＋" & _
+                       principal & "円×" & irate & "%×" & ddif2 & "日/" & ddif4 & "日"
+        End If
+    Else
+        interest = principal * irate * ydif / 100 + _
+                   principal * irate * (ddif1 + ddif2) / 36500
+        culcform = principal & "円×" & irate & "%×" & ydif & "年＋" & _
+                   principal & "円×" & irate & "%×" & (ddif1 & ddif2) & "日/365日"
+    End If
+End If
+
+'切り捨てor四捨五入
+If CheckBox1.Value = False Then
+    interest = Int(interest)
+Else
+    interest = Round(interest)
+End If
+
+If saiff = "" And saill = "" Then
+    MsgBox _
+    "利息　" & interest & "円" & vbCr & vbCr & _
+    "元金　" & principal & "円" & vbCr & _
+    "利率　" & irate & "%" & vbCr & _
+    "期間　" & fy & "年(" & fdatew & ")" & fm & "月" & fd & "日から" & ly & "年(" & ldatew & ")" & lm & "月" & ld & "日まで" & vbCr & _
+    "日数　" & ydif & "年" & ddif & "日" & "(通算" & DateDiff("d", ff, ll) & "日)" & vbCr & vbCr & _
+    "(計算式)" & vbCr & culcform
+ElseIf saiff <> "" And saill <> "" Then
+    MsgBox _
+    "利息　" & interest & "円" & vbCr & vbCr & _
+    "元金　" & principal & "円" & vbCr & _
+    "利率　" & irate & "%" & vbCr & _
+    "期間　" & fy & "年(" & fdatew & ")" & fm & "月" & fd & "日から" & ly & "年(" & ldatew & ")" & lm & "月" & ld & "日まで" & vbCr & _
+    "日数　" & ydif & "年" & ddif & "日" & "(通算" & DateDiff("d", ff, ll) & "日)" & vbCr & vbCr & _
+    "(計算式)" & vbCr & culcform & vbCr & vbCr & _
+    fy & "年(" & fdatew & ")" & fm & "月" & fd & "日は" & saiff & "です。" & vbCr & _
+    ly & "年(" & ldatew & ")" & lm & "月" & ld & "日は" & saill & "です。"
+ElseIf saiff <> "" Then
+    MsgBox _
+    "利息　" & interest & "円" & vbCr & vbCr & _
+    "元金　" & principal & "円" & vbCr & _
+    "利率　" & irate & "%" & vbCr & _
+    "期間　" & fy & "年(" & fdatew & ")" & fm & "月" & fd & "日から" & ly & "年(" & ldatew & ")" & lm & "月" & ld & "日まで" & vbCr & _
+    "日数　" & ydif & "年" & ddif & "日" & "(通算" & DateDiff("d", ff, ll) & "日)" & vbCr & vbCr & _
+    "(計算式)" & vbCr & culcform & vbCr & vbCr & _
+    fy & "年(" & fdatew & ")" & fm & "月" & fd & "日は" & saiff & "です。"
+ElseIf saill <> "" Then
+    MsgBox _
+    "利息　" & interest & "円" & vbCr & vbCr & _
+    "元金　" & principal & "円" & vbCr & _
+    "利率　" & irate & "%" & vbCr & _
+    "期間　" & fy & "年(" & fdatew & ")" & fm & "月" & fd & "日から" & ly & "年(" & ldatew & ")" & lm & "月" & ld & "日まで" & vbCr & _
+    "日数　" & ydif & "年" & ddif & "日" & "(通算" & DateDiff("d", ff, ll) & "日)" & vbCr & vbCr & _
+    "(計算式)" & vbCr & culcform & vbCr & vbCr & _
+    ly & "年(" & ldatew & ")" & lm & "月" & ld & "日は" & saill & "です。"
+End If
+
+End Sub
